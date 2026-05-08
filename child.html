@@ -232,7 +232,7 @@ async function loadData() {
         dbKey: finalKey,
         name: itemName,
         type: type,
-        img: row.c[11]?.v || "https://i.postimg.cc/bv5xRs04/image.png",
+        img: row.c[12]?.v || "https://i.postimg.cc/bv5xRs04/image.png",
         status: sbData?.status || "現貨",
       };
     }).filter(i => i !== null);
