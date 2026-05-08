@@ -119,7 +119,8 @@
     }
     .draw-section-title { font-size: 13px; color: var(--text-soft); margin-bottom: 6px; letter-spacing: 1px; }
     .draw-result-area {
-      min-height: 110px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 200px; /* increased for 2x image */
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
       margin: 12px 0;
     }
     .draw-placeholder {
@@ -132,13 +133,14 @@
       display: flex; flex-direction: column; align-items: center; gap: 8px;
       animation: popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
     }
+    /* 2x size: was 90px → 180px */
     .draw-result-img {
-      width: 90px; height: 90px; object-fit: contain;
-      border-radius: 16px; background: var(--warm);
+      width: 180px; height: 180px; object-fit: contain;
+      border-radius: 24px; background: var(--warm);
       border: 2px solid var(--accent-light);
     }
-    .draw-result-name { font-size: 14px; font-weight: 700; color: var(--text); }
-    .draw-result-role { font-size: 12px; color: var(--text-soft); }
+    .draw-result-name { font-size: 16px; font-weight: 700; color: var(--text); }
+    .draw-result-role { font-size: 13px; color: var(--text-soft); }
 
     @keyframes popIn {
       0% { transform: scale(0.5) translateY(20px); opacity: 0; }
@@ -162,17 +164,21 @@
     .btn-confirm.yes { background: var(--accent); color: #fff; }
     .btn-confirm.no { background: var(--warm); color: var(--text-soft); border: 1.5px solid var(--border); }
 
-    /* Role Filter */
+    /* ===== ROLE FILTER: 4 per row grid ===== */
     .role-filter-section {
       margin: 0 16px 16px;
       background: var(--white); border-radius: 16px; padding: 14px 16px;
       border: 1px solid var(--border);
     }
     .section-label { font-size: 12px; color: var(--text-soft); margin-bottom: 10px; letter-spacing: 1px; font-weight: 600; }
-    .role-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .role-chips {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
     .role-chip {
-      display: flex; align-items: center; gap: 5px;
-      padding: 6px 12px; border-radius: 20px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+      padding: 7px 4px; border-radius: 20px; cursor: pointer;
       border: 1.5px solid var(--border); background: var(--white);
       font-size: 12px; font-weight: 600; color: var(--text-soft);
       transition: all 0.2s;
@@ -254,6 +260,8 @@
     .cal-cell.has-entry { border-color: var(--accent-light); }
     .cal-cell .cal-date { font-size: 10px; color: var(--text-soft); font-weight: 600; align-self: flex-start; margin-left: 4px; }
     .cal-cell img { width: 70%; height: 70%; object-fit: contain; border-radius: 6px; }
+
+    /* Calendar detail modal – with delete button */
     .cal-detail-modal {
       position: fixed; bottom: 0; left: 0; width: 100%; z-index: 9000;
       background: var(--white); border-radius: 24px 24px 0 0;
@@ -265,8 +273,19 @@
     .cal-modal-drag { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 16px; }
     .cal-modal-content { display: flex; gap: 16px; align-items: center; }
     .cal-modal-img { width: 80px; height: 80px; object-fit: contain; border-radius: 14px; background: var(--warm); border: 1.5px solid var(--border); }
+    .cal-modal-info { flex: 1; }
     .cal-modal-info h3 { font-size: 16px; font-weight: 700; margin: 0 0 4px; }
-    .cal-modal-info p { font-size: 13px; color: var(--text-soft); margin: 0; }
+    .cal-modal-info p { font-size: 13px; color: var(--text-soft); margin: 0 0 2px; }
+    .cal-modal-info .cal-modal-role { color: var(--accent); font-weight: 600; }
+    .btn-delete-entry {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      width: 100%; margin-top: 16px; padding: 12px;
+      border-radius: 50px; border: 1.5px solid #e0a0a0;
+      background: #fff5f5; color: #c05050;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-delete-entry:active { background: #ffe0e0; transform: scale(0.97); }
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 8999; display: none; }
     .modal-overlay.open { display: block; }
 
@@ -280,10 +299,10 @@
     .draw-overlay.active { display: flex; }
 
     .draw-anim-stage {
-      position: relative; width: 200px; height: 200px; display: flex; align-items: center; justify-content: center;
+      position: relative; width: 280px; height: 280px; display: flex; align-items: center; justify-content: center;
     }
     .draw-spin-ring {
-      position: absolute; width: 180px; height: 180px; border-radius: 50%;
+      position: absolute; width: 260px; height: 260px; border-radius: 50%;
       border: 3px dashed var(--accent-light);
       animation: spinRing 2s linear infinite;
     }
@@ -301,10 +320,11 @@
       to { transform: translateY(-12px) rotate(15deg); opacity: 1; }
     }
 
+    /* 2x size in animation overlay: was 100px → 200px */
     .draw-bounce-img {
-      width: 100px; height: 100px; object-fit: contain; border-radius: 20px;
+      width: 200px; height: 200px; object-fit: contain; border-radius: 30px;
       animation: bounceDraw 0.6s ease-in-out infinite alternate;
-      background: var(--warm); border: 2px solid var(--accent-light); padding: 8px;
+      background: var(--warm); border: 2px solid var(--accent-light); padding: 12px;
     }
     @keyframes bounceDraw {
       from { transform: translateY(0) scale(1); }
@@ -517,9 +537,10 @@
       <div class="cal-modal-info">
         <h3 id="cal-modal-name"></h3>
         <p id="cal-modal-date"></p>
-        <p id="cal-modal-role" style="color: var(--accent); font-weight:600;"></p>
+        <p id="cal-modal-role" class="cal-modal-role"></p>
       </div>
     </div>
+    <button class="btn-delete-entry" onclick="deleteCalEntry()">🗑 刪除此紀錄</button>
   </div>
 
   <!-- TOAST -->
@@ -549,13 +570,14 @@ const ROLE_CONFIG = {
 // ===== STATE =====
 let activeRole = "chii";
 let currentPage = "home";
-let allItems = []; // {name, roleKey, img, type}
-let ownedItems = new Set(); // item dbKeys
-let history = []; // [{date, name, img, roleKey, dbKey}]
-let selectedRoles = new Set(Object.keys(ROLE_CONFIG)); // all selected by default
+let allItems = [];
+let ownedItems = new Set();
+let history = [];
+let selectedRoles = new Set(Object.keys(ROLE_CONFIG));
 let currentDrawResult = null;
 let calYear = new Date().getFullYear();
 let calMonth = new Date().getMonth();
+let currentCalDate = null; // track which date is open in modal
 
 const frame = document.getElementById("content-frame");
 const subNavContainer = document.getElementById("sub-nav-container");
@@ -585,17 +607,14 @@ function renderHomeDate() {
 // ===== LOAD ALL ITEMS FROM SHEET =====
 async function loadAllItems() {
   try {
-    // Load owned from Supabase
     if (sbClient) {
       const { data } = await sbClient.from('chiikawa_collection').select('item_key');
       if (data) data.forEach(r => ownedItems.add(r.item_key));
     } else {
-      // Fallback to localStorage
       const local = JSON.parse(localStorage.getItem('chiikawa_owned') || '[]');
       local.forEach(k => ownedItems.add(k));
     }
 
-    // Load sheet data
     const res = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`);
     const text = await res.text();
     const json = JSON.parse(text.substr(47).slice(0,-2));
@@ -609,7 +628,6 @@ async function loadAllItems() {
       const img = row.c[12]?.v || "https://i.postimg.cc/bv5xRs04/image.png";
       if (!name) return;
 
-      // Find which role
       for (const [key, cfg] of Object.entries(ROLE_CONFIG)) {
         if (roleField.includes(cfg.sheetKey)) {
           const dbKey = cfg.sbPrefix + name;
@@ -621,7 +639,6 @@ async function loadAllItems() {
 
     updateStats();
     renderRecentList();
-    // Notify child frame about owned state
     if (frame.contentWindow) {
       frame.contentWindow.postMessage({ type: 'ownedSet', owned: Array.from(ownedItems) }, '*');
     }
@@ -634,7 +651,6 @@ function updateStats() {
   const owned = allItems.filter(i => ownedItems.has(i.dbKey)).length;
   document.getElementById('stat-owned').textContent = owned;
   document.getElementById('stat-total').textContent = allItems.length;
-  // streak
   const today = dateStr(new Date());
   let streak = 0;
   const sorted = [...history].sort((a,b) => b.date.localeCompare(a.date));
@@ -642,7 +658,7 @@ function updateStats() {
   for (let i = 0; i < 365; i++) {
     const s = dateStr(d);
     if (sorted.find(h => h.date === s)) { streak++; d.setDate(d.getDate()-1); }
-    else if (s === today) { d.setDate(d.getDate()-1); } // allow today to be empty
+    else if (s === today) { d.setDate(d.getDate()-1); }
     else break;
   }
   document.getElementById('stat-streak').textContent = streak;
@@ -686,15 +702,12 @@ async function startDraw() {
     return;
   }
 
-  // Show overlay animation
   const overlay = document.getElementById('draw-overlay');
   overlay.classList.add('active');
   document.getElementById('btn-draw').disabled = true;
 
-  // Pick random
   const picked = pool[Math.floor(Math.random() * pool.length)];
   
-  // Animate with random icons from pool
   const texts = ['🌸 抽選中… 🌸','🎀 找一找… 🎀','✨ 就快啦… ✨','🍡 決定中… 🍡'];
   let t = 0;
   const animInterval = setInterval(() => {
@@ -703,13 +716,11 @@ async function startDraw() {
     document.getElementById('draw-anim-text').textContent = texts[t++ % texts.length];
   }, 200);
 
-  // Render stars
   renderDrawStars();
 
   await sleep(2000);
   clearInterval(animInterval);
 
-  // Show picked
   document.getElementById('draw-anim-img').src = picked.img;
   document.getElementById('draw-anim-text').textContent = `✨ ${picked.name} ✨`;
 
@@ -717,7 +728,6 @@ async function startDraw() {
   overlay.classList.remove('active');
   document.getElementById('btn-draw').disabled = false;
 
-  // Show result
   currentDrawResult = picked;
   showDrawResult(picked);
 }
@@ -727,9 +737,9 @@ function renderDrawStars() {
   const emojis = ['⭐','🌸','✨','🍀','💫','🎀','🌟'];
   container.innerHTML = emojis.map((e, i) => {
     const angle = (i / emojis.length) * 360;
-    const r = 80;
-    const x = 90 + r * Math.cos(angle * Math.PI/180);
-    const y = 90 + r * Math.sin(angle * Math.PI/180);
+    const r = 120;
+    const x = 130 + r * Math.cos(angle * Math.PI/180);
+    const y = 130 + r * Math.sin(angle * Math.PI/180);
     return `<div class="star" style="left:${x}px;top:${y}px;animation-delay:${i*0.2}s">${e}</div>`;
   }).join('');
 }
@@ -763,14 +773,11 @@ async function confirmDraw() {
   const item = currentDrawResult;
   const today = dateStr(new Date());
   
-  // Remove existing entry for today if any
   history = history.filter(h => h.date !== today);
   history.push({ date: today, name: item.name, img: item.img, roleKey: item.roleKey, dbKey: item.dbKey });
   
-  // Save
   saveHistory();
   
-  // Save to Supabase
   if (sbClient) {
     try {
       await sbClient.from('chiikawa_history').upsert({
@@ -861,6 +868,7 @@ function changeMonth(delta) {
 function openCalModal(dateString) {
   const entry = history.find(h => h.date === dateString);
   if (!entry) return;
+  currentCalDate = dateString;
   document.getElementById('cal-modal-img').src = entry.img;
   document.getElementById('cal-modal-name').textContent = entry.name;
   const d = new Date(dateString);
@@ -873,6 +881,29 @@ function openCalModal(dateString) {
 function closeCalModal() {
   document.getElementById('cal-detail-modal').classList.remove('open');
   document.getElementById('cal-modal-overlay').classList.remove('open');
+  currentCalDate = null;
+}
+
+async function deleteCalEntry() {
+  if (!currentCalDate) return;
+  const dateToDelete = currentCalDate;
+
+  // Remove from local history
+  history = history.filter(h => h.date !== dateToDelete);
+  saveHistory();
+
+  // Remove from Supabase
+  if (sbClient) {
+    try {
+      await sbClient.from('chiikawa_history').delete().eq('date', dateToDelete);
+    } catch(e) { console.warn('Supabase history delete failed', e); }
+  }
+
+  closeCalModal();
+  showToast('🗑 紀錄已刪除');
+  renderCalendar();
+  renderRecentList();
+  updateStats();
 }
 
 // ===== COLLECTION PAGE =====
@@ -880,28 +911,23 @@ function switchRole(key, tabEl) {
   activeRole = key;
   const cfg = ROLE_CONFIG[key];
   
-  // Update CSS var
   document.documentElement.style.setProperty('--tab-color', cfg.color);
   document.documentElement.style.setProperty('--accent', cfg.color);
   document.getElementById('header-role-icon').src = cfg.icon;
   
-  // Update tab UI
   if (tabEl) {
     document.querySelectorAll('.coll-tab').forEach(t => t.classList.remove('active'));
     tabEl.classList.add('active');
   }
   
-  // Hide subnav
   subNavContainer.style.display = 'none';
   subNavContent.innerHTML = '';
   
-  // Load child iframe
   frame.src = `child.html?role=${key}&t=${Date.now()}`;
   frame.style.opacity = '0.3';
 }
 
 function onSearch(val) {
-  // Send search query to child
   if (frame.contentWindow) {
     frame.contentWindow.postMessage({ type: 'search', query: val }, '*');
   }
@@ -919,7 +945,6 @@ window.addEventListener('message', function(e) {
     renderSubNav(e.data.data);
   }
   if (e.data.type === 'childReady') {
-    // Send owned state to child
     frame.contentWindow.postMessage({ type: 'ownedSet', owned: Array.from(ownedItems) }, '*');
   }
   if (e.data.type === 'toggleOwned') {
@@ -950,7 +975,6 @@ async function handleToggleOwned(dbKey, img, name, roleKey) {
     ownedItems.add(dbKey);
   }
   
-  // Persist
   if (sbClient) {
     try {
       if (!wasOwned) {
@@ -964,7 +988,6 @@ async function handleToggleOwned(dbKey, img, name, roleKey) {
   
   showToast(wasOwned ? `已從收藏移除` : `✓ 已加入我的收藏！`);
   
-  // Notify child of updated owned set
   frame.contentWindow.postMessage({ type: 'ownedSet', owned: Array.from(ownedItems) }, '*');
   updateStats();
 }
