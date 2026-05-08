@@ -35,19 +35,7 @@
       max-width: 1200px; margin: 0 auto; padding: 10px;
     }
 
-    .category-section {
-      margin-top: 24px; text-align: left;
-      scroll-margin-top: 180px;
-    }
-    .category-title {
-      font-size: 14px; font-weight: 700;
-      margin-bottom: 12px; padding: 6px 12px;
-      border-left: 4px solid var(--tab-color);
-      color: #3d2f2f; background: rgba(255,255,255,0.7);
-      border-radius: 0 8px 8px 0;
-    }
-
-    /* Grid */
+    /* Grid — no category sections, items rendered flat */
     .group-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
@@ -153,8 +141,6 @@ const ROLE_CONFIGS = {
 let currentRole = "chii";
 let currentConfig = ROLE_CONFIGS["chii"];
 let globalItems = [];
-let allCategories = [];
-let visibleCategories = ["吊娃", "娃"];
 let ownedItems = new Set();
 let supabaseOverrides = {};
 
@@ -176,12 +162,12 @@ window.addEventListener('message', function(e) {
   if (!e.data) return;
 
   if (e.data.type === 'scrollTo') {
-    const el = document.getElementById(`cat-${e.data.category}`);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // No category sections now; no-op or scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   if (e.data.type === 'ownedSet') {
     ownedItems = new Set(e.data.owned || []);
-    renderCards(); // re-render with updated owned state
+    renderCards();
   }
   if (e.data.type === 'search') {
     doSearch(e.data.query || '');
@@ -193,16 +179,6 @@ async function loadData() {
     supabaseOverrides = {};
 
     if (sbClient) {
-      const { data: config } = await sbClient.from('chiikawa_config')
-        .select('config_value')
-        .eq('config_key', currentConfig.configKey)
-        .single();
-      if (config && config.config_value) {
-        visibleCategories = Array.isArray(config.config_value)
-          ? config.config_value
-          : JSON.parse(config.config_value);
-      }
-
       const { data: items } = await sbClient.from('chiikawa_data').select('*');
       items?.forEach(row => { supabaseOverrides[row.item_name] = row; });
     }
@@ -213,10 +189,8 @@ async function loadData() {
     const json = JSON.parse(sheetRes.substr(47).slice(0,-2));
     const rows = json.table.rows || [];
 
-    const tempCats = new Set();
     globalItems = rows.map(row => {
       const roleField = row.c[0]?.v || "";
-      const type = row.c[1]?.v || "其他";
       const itemName = row.c[3]?.v || "";
       if (!itemName || !roleField.includes(currentConfig.sheetKey)) return null;
 
@@ -227,21 +201,19 @@ async function loadData() {
       if (supabaseOverrides[fullKey]) { finalKey = fullKey; sbData = supabaseOverrides[fullKey]; }
       else if (supabaseOverrides[shortKey]) { finalKey = shortKey; sbData = supabaseOverrides[shortKey]; }
 
-      tempCats.add(type);
       return {
         dbKey: finalKey,
         name: itemName,
-        type: type,
         img: row.c[12]?.v || "https://i.postimg.cc/bv5xRs04/image.png",
         status: sbData?.status || "現貨",
       };
     }).filter(i => i !== null);
 
-    allCategories = Array.from(tempCats);
-
     document.getElementById("loading-msg").style.display = 'none';
     renderCards();
-    sendCategoriesToParent();
+
+    // Send a single dummy category so parent sub-nav stays hidden gracefully
+    window.parent.postMessage({ type: 'categories', data: [] }, '*');
 
     // Report total to parent
     window.parent.postMessage({ type: 'totalCount', count: globalItems.length }, '*');
@@ -257,45 +229,36 @@ function renderCards() {
   const container = document.getElementById("card-container");
   container.innerHTML = "";
 
-  const catsToDisplay = allCategories.filter(c => visibleCategories.includes(c));
-  if (!sendCategoriesToParent._sent) sendCategoriesToParent(catsToDisplay);
+  const items = globalItems.filter(i => !i.status.includes("不顯示"));
 
-  catsToDisplay.forEach(cat => {
-    const items = globalItems.filter(i =>
-      i.type === cat && !i.status.includes("不顯示")
-    );
-    if (items.length === 0) return;
+  if (items.length === 0) {
+    container.innerHTML = '<div class="empty-note">沒有項目</div>';
+    setTimeout(sendHeight, 100);
+    return;
+  }
 
-    const section = document.createElement("div");
-    section.id = `cat-${cat}`;
-    section.className = "category-section";
-    section.innerHTML = `<div class="category-title">${cat}</div>`;
+  const grid = document.createElement("div");
+  grid.className = "group-grid";
 
-    const grid = document.createElement("div");
-    grid.className = "group-grid";
-
-    items.forEach(item => {
-      const isOwned = ownedItems.has(item.dbKey);
-      const card = document.createElement("div");
-      card.className = `card ${isOwned ? 'owned' : 'not-owned'}`;
-      card.dataset.key = item.dbKey;
-      card.dataset.name = item.name;
-      card.innerHTML = `
-        <button class="owned-btn" onclick="event.stopPropagation(); toggleOwned('${item.dbKey}', '${escHtml(item.img)}', '${escHtml(item.name)}')">
-          ${isOwned ? '♥' : '♡'}
-        </button>
-        <img src="${item.img}" loading="lazy" alt="${escHtml(item.name)}">
-        <div class="name">${item.name}</div>
-        <span class="owned-label">✓ 已擁有</span>
-        <span class="not-owned-label">未擁有</span>
-      `;
-      grid.appendChild(card);
-    });
-
-    section.appendChild(grid);
-    container.appendChild(section);
+  items.forEach(item => {
+    const isOwned = ownedItems.has(item.dbKey);
+    const card = document.createElement("div");
+    card.className = `card ${isOwned ? 'owned' : 'not-owned'}`;
+    card.dataset.key = item.dbKey;
+    card.dataset.name = item.name;
+    card.innerHTML = `
+      <button class="owned-btn" onclick="event.stopPropagation(); toggleOwned('${item.dbKey}', '${escHtml(item.img)}', '${escHtml(item.name)}')">
+        ${isOwned ? '♥' : '♡'}
+      </button>
+      <img src="${item.img}" loading="lazy" alt="${escHtml(item.name)}">
+      <div class="name">${item.name}</div>
+      <span class="owned-label">✓ 已擁有</span>
+      <span class="not-owned-label">未擁有</span>
+    `;
+    grid.appendChild(card);
   });
 
+  container.appendChild(grid);
   setTimeout(sendHeight, 100);
 }
 
@@ -326,11 +289,6 @@ function doSearch(query) {
 
 function escHtml(s) {
   return String(s).replace(/'/g,"&#39;").replace(/"/g,"&quot;");
-}
-
-function sendCategoriesToParent(list = null) {
-  const data = list || allCategories.filter(c => visibleCategories.includes(c));
-  window.parent.postMessage({ type: 'categories', data: data }, '*');
 }
 
 function sendHeight() {
