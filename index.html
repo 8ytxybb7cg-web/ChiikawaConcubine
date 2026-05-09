@@ -164,7 +164,7 @@
     .btn-confirm.yes { background: var(--accent); color: #fff; }
     .btn-confirm.no { background: var(--warm); color: var(--text-soft); border: 1.5px solid var(--border); }
 
-    /* ===== ROLE FILTER: 4 per row grid ===== */
+    /* ===== ROLE FILTER: 5 per row circle icons ===== */
     .role-filter-section {
       margin: 0 16px 16px;
       background: var(--white); border-radius: 16px; padding: 14px 16px;
@@ -173,18 +173,22 @@
     .section-label { font-size: 12px; color: var(--text-soft); margin-bottom: 10px; letter-spacing: 1px; font-weight: 600; }
     .role-chips {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 8px;
+      justify-items: center;
     }
     .role-chip {
-      display: flex; align-items: center; justify-content: center; gap: 5px;
-      padding: 7px 4px; border-radius: 20px; cursor: pointer;
-      border: 1.5px solid var(--border); background: var(--white);
-      font-size: 12px; font-weight: 600; color: var(--text-soft);
-      transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center;
+      width: 48px; height: 48px; border-radius: 50%; cursor: pointer;
+      border: 2.5px solid var(--border); background: var(--white);
+      transition: all 0.2s; overflow: hidden;
     }
-    .role-chip.active { border-color: var(--tab-color); background: var(--accent-soft); color: var(--accent); }
-    .role-chip img { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; }
+    .role-chip.active {
+      border-color: var(--tab-color);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--tab-color) 25%, transparent);
+    }
+    .role-chip img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; opacity: 0.45; filter: grayscale(40%); }
+    .role-chip.active img { opacity: 1; filter: none; }
 
     /* Recent History */
     .section-card {
@@ -475,6 +479,8 @@
           <div class="coll-tab" onclick="switchRole('kuri',this)">栗子</div>
           <div class="coll-tab" onclick="switchRole('shisa',this)">風獅</div>
           <div class="coll-tab" onclick="switchRole('furu',this)">古本</div>
+          <div class="coll-tab" onclick="switchRole('jokebear',this)">大舅</div>
+          <div class="coll-tab" onclick="switchRole('korokke',this)">可樂餅</div>
           <div class="coll-tab" onclick="switchRole('others',this)">其他</div>
         </div>
       </div>
@@ -563,8 +569,10 @@ const ROLE_CONFIG = {
   "master": { name:"師傅", sheetKey:"師", sbPrefix:"師傅", configKey:"visible_categories_others", color:"#CCAFA5", icon:"https://i.postimg.cc/y8vNtY1j/icon005.png" },
   "kuri":   { name:"栗子", sheetKey:"栗", sbPrefix:"栗子", configKey:"visible_categories_kuri",   color:"#94C973", icon:"https://i.postimg.cc/mD0kjXLG/icon006.png" },
   "shisa":  { name:"風獅", sheetKey:"獅", sbPrefix:"風獅", configKey:"visible_categories_shisa",  color:"#FBAA60", icon:"https://i.postimg.cc/Ghn9s5gF/icon007.png" },
-  "furu":   { name:"古本", sheetKey:"古", sbPrefix:"古本", configKey:"visible_categories_others", color:"#eb9e97", icon:"https://i.postimg.cc/2jsL76yB/icon008.png" },
-  "others": { name:"其他", sheetKey:"其", sbPrefix:"其他", configKey:"visible_categories_others", color:"#45818e", icon:"https://i.postimg.cc/PqVPpf0J/icon009.png" }
+  "furu":    { name:"古本", sheetKey:"古", sbPrefix:"古本", configKey:"visible_categories_others", color:"#eb9e97", icon:"https://i.postimg.cc/2jsL76yB/icon008.png" },
+  "jokebear":  { name:"大舅", sheetKey:"大", sbPrefix:"大舅", configKey:"visible_categories_others", color:"#eca4b1", icon:"https://i.postimg.cc/gkDtxspX/icon.png" },
+  "korokke": { name:"可樂餅", sheetKey:"可", sbPrefix:"可樂餅", configKey:"visible_categories_others", color:"#FBAA60", icon:"https://i.postimg.cc/HkkZXMWS/icon.png" },
+  "others":  { name:"其他", sheetKey:"其", sbPrefix:"其他", configKey:"visible_categories_others", color:"#45818e", icon:"https://i.postimg.cc/PqVPpf0J/icon009.png" }
 };
 
 // ===== STATE =====
@@ -669,8 +677,7 @@ function renderRoleChips() {
   const container = document.getElementById('role-chips');
   container.innerHTML = Object.entries(ROLE_CONFIG).map(([key, cfg]) => `
     <div class="role-chip active" id="chip-${key}" onclick="toggleRoleChip('${key}')" style="--tab-color:${cfg.color}">
-      <img src="${cfg.icon}" alt="">
-      ${cfg.name}
+      <img src="${cfg.icon}" alt="${cfg.name}">
     </div>
   `).join('');
 }
