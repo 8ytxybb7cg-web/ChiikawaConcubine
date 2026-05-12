@@ -541,7 +541,65 @@
 
   <div class="toast" id="toast"></div>
 
+<div id="home-date" class="home-date" style="position: relative; cursor: pointer;">
+  <span id="display-date-text">載入中...</span>
+  <input type="date" id="date-selector" style="position: absolute; opacity: 0; left: 0; top: 0; width: 100%; height: 100%; cursor: pointer;">
+</div>
+
 <script>
+// 1. 修改 fetchData 函數，加入防止緩存的參數
+async function fetchData() {
+  try {
+    const cacheBuster = `?t=${Date.now()}`; // 每次請求都加上時間戳
+    const response = await fetch(CSV_URL + cacheBuster);
+    // ... 原有代碼 ...
+  } catch (e) { /* ... */ }
+}
+
+// 2. 修改抽籤日期邏輯
+let selectedDate = new Date(); // 新增全域變數記錄當前選擇日期
+
+document.getElementById('date-selector').addEventListener('change', (e) => {
+  if (e.target.value) {
+    selectedDate = new Date(e.target.value);
+    updateDateDisplay();
+    initLottery(); // 重新計算該日結果
+  }
+});
+
+function updateDateDisplay() {
+  const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+  document.getElementById('display-date-text').innerText = selectedDate.toLocaleDateString('zh-HK', options);
+  document.getElementById('date-selector').value = dateStr(selectedDate);
+}
+
+// 3. 修改 initLottery 函數，將原本的 new Date() 改為 selectedDate
+async function initLottery() {
+  const dStr = dateStr(selectedDate);
+  const resultArea = document.getElementById('lottery-result');
+  const historyList = document.getElementById('history-list');
+  
+  // 基於 selectedDate 顯示「今日」結果
+  const seed = getSeed(selectedDate);
+  const dailyItem = allItems[seed % allItems.length];
+  
+  // ... 更新 UI 邏輯 (保持原有 render 代碼，但日期參考 selectedDate) ...
+  
+  // 最近記錄也改為從 selectedDate 開始往前推 7 天
+  renderHistory(selectedDate); 
+}
+
+// 4. 修改 renderHistory 函數，接受起點日期
+function renderHistory(startDate) {
+  const historyList = document.getElementById('history-list');
+  historyList.innerHTML = '';
+  for (let i = 1; i <= 7; i++) {
+    const d = new Date(startDate);
+    d.setDate(d.getDate() - i);
+    // ... 原有 render 邏輯 ...
+  }
+}
+
 // ===== CONFIG =====
 const SUPABASE_URL = 'https://myrhatzdypiwwgmmfbuw.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_bnnah-2fsCaQnKZDoKNJQw_NuYQVvKi';
