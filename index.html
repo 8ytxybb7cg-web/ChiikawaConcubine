@@ -733,39 +733,21 @@ async function loadAllItems() {
       local.forEach(k => ownedItems.add(k));
     }
 
-    // 使用 CSV export 而非 gviz/tq，避免 Google Sheet 篩選器導致部分行被隱藏
+    // gviz/tq 加入 tq=select * 參數，強制回傳全部行，繞過 Sheet 的篩選器（filter view）
     const csvRes = await fetch(
-      `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`
+      `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}&tq=${encodeURIComponent('select *')}&headers=1`
     );
     const csvText = await csvRes.text();
-
-    // 簡易 CSV 解析器（支援引號欄位內含逗號）
-    function parseCSV(text) {
-      return text.split(/\r?\n/).map(line => {
-        const cols = []; let cur = '', inQ = false;
-        for (let i = 0; i < line.length; i++) {
-          const ch = line[i];
-          if (ch === '"') {
-            if (inQ && line[i+1] === '"') { cur += '"'; i++; }
-            else inQ = !inQ;
-          } else if (ch === ',' && !inQ) { cols.push(cur); cur = ''; }
-          else cur += ch;
-        }
-        cols.push(cur);
-        return cols;
-      });
-    }
-
-    // 第一行為標題，跳過
-    const csvRows = parseCSV(csvText).slice(1);
+    const csvJson = JSON.parse(csvText.substr(47).slice(0,-2));
+    const rows = csvJson.table.rows || [];
 
     allItems = [];
-    csvRows.forEach(cols => {
+    rows.forEach(row => {
       // 欄位索引與 Excel 一致：[0]=角色 [1]=種類 [3]=名稱 [12]=圖片
-      const roleField = (cols[0] || "").trim();
-      const type = (cols[1] || "其他").trim();
-      const name = (cols[3] || "").trim();
-      const img = (cols[12] || "").trim() || "https://i.postimg.cc/bv5xRs04/image.png";
+      const roleField = (row.c[0]?.v || "").trim();
+      const type = (row.c[1]?.v || "其他");
+      const name = String(row.c[3]?.v || "").trim();
+      const img = row.c[12]?.v || "https://i.postimg.cc/bv5xRs04/image.png";
       if (!name) return;
 
       for (const [key, cfg] of Object.entries(ROLE_CONFIG)) {
