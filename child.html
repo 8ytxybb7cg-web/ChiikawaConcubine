@@ -127,17 +127,17 @@ const SHEET_NAME = "ちいかわ";
 let sbClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
 const ROLE_CONFIGS = {
-  "chii":   { name:"吉伊", sheetKey:"吉", sbPrefix:"吉伊", configKey:"visible_categories_chii",   color:"#d77485", loadImg:"https://i.postimg.cc/ncqjRJ9S/icon001.png" },
-  "hachi":  { name:"小八", sheetKey:"八", sbPrefix:"小八", configKey:"visible_categories_hachi",  color:"#6293b8", loadImg:"https://i.postimg.cc/Ss5kqJ3L/icon002.png" },
-  "usagi":  { name:"兔兔", sheetKey:"兔", sbPrefix:"兔兔", configKey:"visible_categories",        color:"#f9be3c", loadImg:"https://i.postimg.cc/QdbBDJbp/icon003.png" },
-  "momo":   { name:"小桃", sheetKey:"桃", sbPrefix:"小桃", configKey:"visible_categories_others", color:"#838BC2", loadImg:"https://i.postimg.cc/rwcd7PSV/icon016.png" },
-  "furu":    { name:"古本", sheetKey:"古", sbPrefix:"古本", configKey:"visible_categories_others", color:"#eb9e97", loadImg:"https://i.postimg.cc/2jsL76yB/icon008.png" },
-  "master": { name:"師傅", sheetKey:"師", sbPrefix:"師傅", configKey:"visible_categories_others", color:"#CCAFA5", loadImg:"https://i.postimg.cc/y8vNtY1j/icon005.png" },
-  "kuri":   { name:"栗子", sheetKey:"栗", sbPrefix:"栗子", configKey:"visible_categories_kuri",   color:"#94C973", loadImg:"https://i.postimg.cc/mD0kjXLG/icon006.png" },
-  "shisa":  { name:"風獅", sheetKey:"獅", sbPrefix:"風獅", configKey:"visible_categories_shisa",  color:"#FBAA60", loadImg:"https://i.postimg.cc/Ghn9s5gF/icon007.png" },
-  "jokebear":  { name:"大舅", sheetKey:"舅", sbPrefix:"大舅", configKey:"visible_categories_others", color:"#eca4b1", loadImg:"https://i.postimg.cc/gkDtxspX/icon.png" },
-  "korokke": { name:"可樂餅", sheetKey:"餅", sbPrefix:"可樂餅", configKey:"visible_categories_others", color:"#FBAA60", loadImg:"https://i.postimg.cc/HkkZXMWS/icon.png" },
-  "others":  { name:"其他", sheetKey:"其", sbPrefix:"其他", configKey:"visible_categories_others", color:"#45818e", loadImg:"https://i.postimg.cc/PqVPpf0J/icon009.png" }
+  "chii":   { name:"吉伊", sheetKey:"吉伊", sbPrefix:"吉伊", configKey:"visible_categories_chii",   color:"#d77485", loadImg:"https://i.postimg.cc/ncqjRJ9S/icon001.png" },
+  "hachi":  { name:"小八", sheetKey:"小八", sbPrefix:"小八", configKey:"visible_categories_hachi",  color:"#6293b8", loadImg:"https://i.postimg.cc/Ss5kqJ3L/icon002.png" },
+  "usagi":  { name:"兔兔", sheetKey:"兔兔", sbPrefix:"兔兔", configKey:"visible_categories_usagi",  color:"#f9be3c", loadImg:"https://i.postimg.cc/QdbBDJbp/icon003.png" },
+  "momo":   { name:"小桃", sheetKey:"小桃", sbPrefix:"小桃", configKey:"visible_categories_momo", color:"#838BC2", loadImg:"https://i.postimg.cc/rwcd7PSV/icon016.png" },
+  "furu":    { name:"古本", sheetKey:"古本", sbPrefix:"古本", configKey:"visible_categories_furu", color:"#eb9e97", loadImg:"https://i.postimg.cc/2jsL76yB/icon008.png" },
+  "master": { name:"師傅", sheetKey:"師傅", sbPrefix:"師傅", configKey:"visible_categories_master", color:"#CCAFA5", loadImg:"https://i.postimg.cc/y8vNtY1j/icon005.png" },
+  "kuri":   { name:"栗子", sheetKey:"栗子", sbPrefix:"栗子", configKey:"visible_categories_kuri",   color:"#94C973", loadImg:"https://i.postimg.cc/mD0kjXLG/icon006.png" },
+  "shisa":  { name:"獅薩", sheetKey:"獅薩", sbPrefix:"獅薩", configKey:"visible_categories_shisa",  color:"#FBAA60", loadImg:"https://i.postimg.cc/Ghn9s5gF/icon007.png" },
+  "jokebear":  { name:"大舅", sheetKey:"大舅", sbPrefix:"大舅", configKey:"visible_categories_jokebear", color:"#eca4b1", loadImg:"https://i.postimg.cc/gkDtxspX/icon.png" },
+  "korokke": { name:"可樂餅", sheetKey:"可樂餅", sbPrefix:"可樂餅", configKey:"visible_categories_korokke", color:"#FBAA60", loadImg:"https://i.postimg.cc/HkkZXMWS/icon.png" },
+  "others":  { name:"其他角色", sheetKey:"其他角色", sbPrefix:"其他", configKey:"visible_categories_others", color:"#45818e", loadImg:"https://i.postimg.cc/PqVPpf0J/icon009.png" }
 };
 
 let currentRole = "chii";
