@@ -119,7 +119,7 @@
     }
     .draw-section-title { font-size: 13px; color: var(--text-soft); margin-bottom: 6px; letter-spacing: 1px; }
     .draw-result-area {
-      min-height: 200px; /* increased for 2x image */
+      min-height: 200px;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       margin: 12px 0;
     }
@@ -133,7 +133,6 @@
       display: flex; flex-direction: column; align-items: center; gap: 8px;
       animation: popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
     }
-    /* 2x size: was 90px → 180px */
     .draw-result-img {
       width: 180px; height: 180px; object-fit: contain;
       border-radius: 24px; background: var(--warm);
@@ -146,6 +145,45 @@
       0% { transform: scale(0.5) translateY(20px); opacity: 0; }
       100% { transform: scale(1) translateY(0); opacity: 1; }
     }
+
+    /* ===== DATE PICKER ROW ===== */
+    .draw-date-row {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; margin-bottom: 14px;
+    }
+    .draw-date-label {
+      font-size: 12px; color: var(--text-soft); font-weight: 600; white-space: nowrap;
+    }
+    .draw-date-input-wrap {
+      position: relative; display: flex; align-items: center;
+    }
+    .draw-date-input {
+      padding: 6px 32px 6px 12px;
+      border: 1.5px solid var(--accent-light);
+      border-radius: 20px;
+      font-size: 13px; font-weight: 600;
+      color: var(--accent);
+      background: var(--accent-soft);
+      outline: none; cursor: pointer;
+      font-family: inherit;
+      -webkit-appearance: none;
+      appearance: none;
+      min-width: 140px; text-align: center;
+    }
+    .draw-date-input:focus { border-color: var(--accent); }
+    .draw-date-cal-icon {
+      position: absolute; right: 10px; pointer-events: none;
+      font-size: 14px; color: var(--accent);
+    }
+    .draw-date-today-btn {
+      padding: 6px 12px; border-radius: 20px;
+      border: 1.5px solid var(--border);
+      background: var(--white); color: var(--text-soft);
+      font-size: 11px; font-weight: 600; cursor: pointer;
+      transition: all 0.2s; white-space: nowrap;
+      font-family: inherit;
+    }
+    .draw-date-today-btn:active { background: var(--warm); }
 
     .btn-draw {
       width: 100%; padding: 14px;
@@ -204,7 +242,7 @@
     .recent-item-date { font-size: 10px; color: var(--text-soft); }
     .recent-empty { font-size: 13px; color: var(--text-soft); text-align: center; padding: 10px 0; }
 
-    /* ===== COLLECTION (图鑑) PAGE ===== */
+    /* ===== COLLECTION PAGE ===== */
     .collection-header {
       padding: 16px 16px 8px;
       background: var(--white);
@@ -265,7 +303,7 @@
     .cal-cell .cal-date { font-size: 10px; color: var(--text-soft); font-weight: 600; align-self: flex-start; margin-left: 4px; }
     .cal-cell img { width: 70%; height: 70%; object-fit: contain; border-radius: 6px; }
 
-    /* Calendar detail modal – with delete button */
+    /* Calendar detail modal */
     .cal-detail-modal {
       position: fixed; bottom: 0; left: 0; width: 100%; z-index: 9000;
       background: var(--white); border-radius: 24px 24px 0 0;
@@ -324,7 +362,6 @@
       to { transform: translateY(-12px) rotate(15deg); opacity: 1; }
     }
 
-    /* 2x size in animation overlay: was 100px → 200px */
     .draw-bounce-img {
       width: 200px; height: 200px; object-fit: contain; border-radius: 30px;
       animation: bounceDraw 0.6s ease-in-out infinite alternate;
@@ -398,6 +435,27 @@
       white-space: nowrap;
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ===== CONFIRM DIALOG (overwrite warning) ===== */
+    .confirm-dialog-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      z-index: 19000; display: none; align-items: center; justify-content: center;
+    }
+    .confirm-dialog-overlay.open { display: flex; }
+    .confirm-dialog {
+      background: var(--white); border-radius: 20px;
+      padding: 24px 20px 20px; margin: 0 24px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+      max-width: 320px; width: 100%; text-align: center;
+      animation: popIn 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
+    }
+    .confirm-dialog-icon { font-size: 36px; margin-bottom: 10px; }
+    .confirm-dialog-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .confirm-dialog-body { font-size: 13px; color: var(--text-soft); line-height: 1.6; margin-bottom: 18px; }
+    .confirm-dialog-btns { display: flex; gap: 10px; }
+    .confirm-dialog-btns button { flex: 1; padding: 11px; border-radius: 50px; border: none; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
+    .confirm-dialog-cancel { background: var(--warm); color: var(--text-soft); border: 1.5px solid var(--border) !important; }
+    .confirm-dialog-ok { background: var(--accent); color: #fff; }
   </style>
 </head>
 <body>
@@ -439,7 +497,18 @@
 
       <!-- Draw Section -->
       <div class="draw-section">
-        <div class="draw-section-title">✦ 今日掛件抽選 ✦</div>
+        <div class="draw-section-title">✦ 掛件抽選 ✦</div>
+
+        <!-- Date Picker Row -->
+        <div class="draw-date-row">
+          <span class="draw-date-label">抽選日期</span>
+          <div class="draw-date-input-wrap">
+            <input type="date" class="draw-date-input" id="draw-date-input">
+            <span class="draw-date-cal-icon">📅</span>
+          </div>
+          <button class="draw-date-today-btn" onclick="resetDrawDateToday()">今日</button>
+        </div>
+
         <div class="draw-result-area" id="draw-result-area">
           <div class="draw-placeholder">
             <div class="draw-placeholder-icon">🎀</div>
@@ -549,6 +618,19 @@
     <button class="btn-delete-entry" onclick="deleteCalEntry()">🗑 刪除此紀錄</button>
   </div>
 
+  <!-- OVERWRITE CONFIRM DIALOG -->
+  <div class="confirm-dialog-overlay" id="overwrite-dialog-overlay">
+    <div class="confirm-dialog">
+      <div class="confirm-dialog-icon">⚠️</div>
+      <div class="confirm-dialog-title">已有當日紀錄</div>
+      <div class="confirm-dialog-body" id="overwrite-dialog-body"></div>
+      <div class="confirm-dialog-btns">
+        <button class="confirm-dialog-cancel" onclick="closeOverwriteDialog()">取消</button>
+        <button class="confirm-dialog-ok" onclick="doSaveDraw()">確認覆蓋</button>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
@@ -561,18 +643,19 @@ const SHEET_NAME = "ちいかわ";
 
 let sbClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
+// sheetKey 已改為 Google Sheet「角色」欄精確全名，搭配 === 比對
 const ROLE_CONFIG = {
-  "chii":   { name:"吉伊", sheetKey:"吉", sbPrefix:"吉伊", configKey:"visible_categories_chii",   color:"#d77485", icon:"https://i.postimg.cc/vZDs4YNZ/icon.png" },
-  "hachi":  { name:"小八", sheetKey:"八", sbPrefix:"小八", configKey:"visible_categories_hachi",  color:"#6293b8", icon:"https://i.postimg.cc/sDTzfQKL/icon.png" },
-  "usagi":  { name:"兔兔", sheetKey:"兔", sbPrefix:"兔兔", configKey:"visible_categories",        color:"#f9be3c", icon:"https://i.postimg.cc/xdzVPsYr/icon.png" },
-  "momo":   { name:"小桃", sheetKey:"桃", sbPrefix:"小桃", configKey:"visible_categories_others", color:"#838BC2", icon:"https://i.postimg.cc/9MP36rrJ/icon.png" },
-  "furu":    { name:"古本", sheetKey:"古", sbPrefix:"古本", configKey:"visible_categories_others", color:"#eb9e97", icon:"https://i.postimg.cc/nh5t7yyY/icon.png" },
-  "master": { name:"師傅", sheetKey:"師", sbPrefix:"師傅", configKey:"visible_categories_others", color:"#CCAFA5", icon:"https://i.postimg.cc/fTq4Q4Rn/icon.png" },
-  "kuri":   { name:"栗子", sheetKey:"栗", sbPrefix:"栗子", configKey:"visible_categories_kuri",   color:"#94C973", icon:"https://i.postimg.cc/FzGMK8bS/icon.png" },
-  "shisa":  { name:"風獅", sheetKey:"獅", sbPrefix:"風獅", configKey:"visible_categories_shisa",  color:"#FBAA60", icon:"https://i.postimg.cc/660Jz4sQ/icon.png" },
-  "jokebear":  { name:"大舅", sheetKey:"大", sbPrefix:"大舅", configKey:"visible_categories_others", color:"#eca4b1", icon:"https://i.postimg.cc/d3qMwwCv/fen-yeicon-zhong-zheng.png" },
-  "korokke": { name:"可樂餅", sheetKey:"可", sbPrefix:"可樂餅", configKey:"visible_categories_others", color:"#FBAA60", icon:"https://i.postimg.cc/HkkZXMWS/icon.png" },
-  "others":  { name:"其他", sheetKey:"其", sbPrefix:"其他", configKey:"visible_categories_others", color:"#45818e", icon:"https://i.postimg.cc/63xJbd58/icon.png" }
+  "chii":      { name:"吉伊",   sheetKey:"吉伊",    sbPrefix:"吉伊",   configKey:"visible_categories_chii",   color:"#d77485", icon:"https://i.postimg.cc/vZDs4YNZ/icon.png" },
+  "hachi":     { name:"小八",   sheetKey:"小八",    sbPrefix:"小八",   configKey:"visible_categories_hachi",  color:"#6293b8", icon:"https://i.postimg.cc/sDTzfQKL/icon.png" },
+  "usagi":     { name:"兔兔",   sheetKey:"兔兔",    sbPrefix:"兔兔",   configKey:"visible_categories",        color:"#f9be3c", icon:"https://i.postimg.cc/xdzVPsYr/icon.png" },
+  "momo":      { name:"小桃",   sheetKey:"小桃",    sbPrefix:"小桃",   configKey:"visible_categories_others", color:"#838BC2", icon:"https://i.postimg.cc/9MP36rrJ/icon.png" },
+  "furu":      { name:"古本",   sheetKey:"古本",    sbPrefix:"古本",   configKey:"visible_categories_others", color:"#eb9e97", icon:"https://i.postimg.cc/nh5t7yyY/icon.png" },
+  "master":    { name:"師傅",   sheetKey:"師傅",    sbPrefix:"師傅",   configKey:"visible_categories_others", color:"#CCAFA5", icon:"https://i.postimg.cc/fTq4Q4Rn/icon.png" },
+  "kuri":      { name:"栗子",   sheetKey:"栗子",    sbPrefix:"栗子",   configKey:"visible_categories_kuri",   color:"#94C973", icon:"https://i.postimg.cc/FzGMK8bS/icon.png" },
+  "shisa":     { name:"風獅",   sheetKey:"獅薩",    sbPrefix:"風獅",   configKey:"visible_categories_shisa",  color:"#FBAA60", icon:"https://i.postimg.cc/660Jz4sQ/icon.png" },
+  "jokebear":  { name:"大舅",   sheetKey:"大舅",    sbPrefix:"大舅",   configKey:"visible_categories_others", color:"#eca4b1", icon:"https://i.postimg.cc/d3qMwwCv/fen-yeicon-zhong-zheng.png" },
+  "korokke":   { name:"可樂餅", sheetKey:"可樂餅",  sbPrefix:"可樂餅", configKey:"visible_categories_others", color:"#FBAA60", icon:"https://i.postimg.cc/HkkZXMWS/icon.png" },
+  "others":    { name:"其他",   sheetKey:"其他角色",sbPrefix:"其他",   configKey:"visible_categories_others", color:"#45818e", icon:"https://i.postimg.cc/63xJbd58/icon.png" }
 };
 
 // ===== STATE =====
@@ -585,7 +668,10 @@ let selectedRoles = new Set(Object.keys(ROLE_CONFIG));
 let currentDrawResult = null;
 let calYear = new Date().getFullYear();
 let calMonth = new Date().getMonth();
-let currentCalDate = null; // track which date is open in modal
+let currentCalDate = null;
+// Pending save item (used by overwrite confirm dialog)
+let pendingDrawItem = null;
+let pendingDrawDate = null;
 
 const frame = document.getElementById("content-frame");
 const subNavContainer = document.getElementById("sub-nav-container");
@@ -594,6 +680,7 @@ const subNavContent = document.getElementById("sub-nav-content");
 // ===== INIT =====
 async function init() {
   renderHomeDate();
+  initDrawDate();
   renderRoleChips();
   loadHistory();
   renderRecentList();
@@ -603,6 +690,7 @@ async function init() {
   switchRole("chii", document.querySelector(".coll-tab.active"));
 }
 
+// ===== DATE DISPLAY =====
 function renderHomeDate() {
   const now = new Date();
   const days = ["日","一","二","三","四","五","六"];
@@ -610,6 +698,28 @@ function renderHomeDate() {
     `${now.getFullYear()} 年 ${now.getMonth()+1} 月 ${now.getDate()} 日 （星期${days[now.getDay()]}）`;
   document.getElementById("cal-month-title").textContent =
     `${calYear} 年 ${calMonth+1} 月`;
+}
+
+// ===== DRAW DATE PICKER =====
+function initDrawDate() {
+  const input = document.getElementById("draw-date-input");
+  input.value = dateStr(new Date());
+  input.max = dateStr(new Date()); // prevent selecting future dates
+  input.addEventListener('change', function() {
+    // Reset draw result area when date changes
+    redraw();
+  });
+}
+
+function resetDrawDateToday() {
+  const input = document.getElementById("draw-date-input");
+  input.value = dateStr(new Date());
+  redraw();
+}
+
+function getDrawDate() {
+  const val = document.getElementById("draw-date-input").value;
+  return val || dateStr(new Date());
 }
 
 // ===== LOAD ALL ITEMS FROM SHEET =====
@@ -630,14 +740,15 @@ async function loadAllItems() {
 
     allItems = [];
     rows.forEach(row => {
-      const roleField = row.c[0]?.v || "";
+      // 精確比對角色全名
+      const roleField = (row.c[0]?.v || "").trim();
       const type = row.c[1]?.v || "其他";
       const name = row.c[3]?.v || "";
       const img = row.c[12]?.v || "https://i.postimg.cc/bv5xRs04/image.png";
       if (!name) return;
 
       for (const [key, cfg] of Object.entries(ROLE_CONFIG)) {
-        if (roleField.includes(cfg.sheetKey)) {
+        if (roleField === cfg.sheetKey) {
           const dbKey = cfg.sbPrefix + name;
           allItems.push({ name, roleKey: key, roleName: cfg.name, img, type, dbKey });
           break;
@@ -753,11 +864,16 @@ function renderDrawStars() {
 
 function showDrawResult(item) {
   const area = document.getElementById('draw-result-area');
+  const drawDate = getDrawDate();
+  const isToday = drawDate === dateStr(new Date());
+  const d = new Date(drawDate + 'T00:00:00');
+  const dateLabel = isToday ? '今日' : `${d.getMonth()+1}月${d.getDate()}日`;
+
   area.innerHTML = `
     <div class="draw-result-card">
       <img class="draw-result-img" src="${item.img}" alt="${item.name}">
       <div class="draw-result-name">${item.name}</div>
-      <div class="draw-result-role">${ROLE_CONFIG[item.roleKey]?.name || ''}</div>
+      <div class="draw-result-role">${ROLE_CONFIG[item.roleKey]?.name || ''} · ${dateLabel}</div>
     </div>
   `;
   document.getElementById('draw-confirm-btns').style.display = 'flex';
@@ -778,17 +894,53 @@ function redraw() {
 async function confirmDraw() {
   if (!currentDrawResult) return;
   const item = currentDrawResult;
-  const today = dateStr(new Date());
-  
-  history = history.filter(h => h.date !== today);
-  history.push({ date: today, name: item.name, img: item.img, roleKey: item.roleKey, dbKey: item.dbKey });
+  const drawDate = getDrawDate();
+
+  // Check if record already exists for this date
+  const existing = history.find(h => h.date === drawDate);
+  if (existing) {
+    // Show overwrite confirmation dialog
+    pendingDrawItem = item;
+    pendingDrawDate = drawDate;
+    const d = new Date(drawDate + 'T00:00:00');
+    const dateLabel = `${d.getFullYear()} 年 ${d.getMonth()+1} 月 ${d.getDate()} 日`;
+    document.getElementById('overwrite-dialog-body').textContent =
+      `${dateLabel} 已有紀錄「${existing.name}」，確定要覆蓋為「${item.name}」嗎？`;
+    document.getElementById('overwrite-dialog-overlay').classList.add('open');
+    return;
+  }
+
+  // No conflict — save directly
+  await doSaveDraw();
+}
+
+function closeOverwriteDialog() {
+  document.getElementById('overwrite-dialog-overlay').classList.remove('open');
+  pendingDrawItem = null;
+  pendingDrawDate = null;
+}
+
+async function doSaveDraw() {
+  // Use pending if from dialog, else use current
+  const item = pendingDrawItem || currentDrawResult;
+  const drawDate = pendingDrawDate || getDrawDate();
+
+  // Close dialog if open
+  document.getElementById('overwrite-dialog-overlay').classList.remove('open');
+  pendingDrawItem = null;
+  pendingDrawDate = null;
+
+  if (!item) return;
+
+  history = history.filter(h => h.date !== drawDate);
+  history.push({ date: drawDate, name: item.name, img: item.img, roleKey: item.roleKey, dbKey: item.dbKey });
   
   saveHistory();
   
   if (sbClient) {
     try {
       await sbClient.from('chiikawa_history').upsert({
-        date: today,
+        date: drawDate,
         item_key: item.dbKey,
         item_name: item.name,
         item_img: item.img,
@@ -798,11 +950,20 @@ async function confirmDraw() {
     } catch(e) { console.warn('Supabase history save failed', e); }
   }
 
-  showToast(`✓ 今日掛件：${item.name} 已記錄！`);
+  const isToday = drawDate === dateStr(new Date());
+  const d = new Date(drawDate + 'T00:00:00');
+  const dateLabel = isToday ? '今日' : `${d.getMonth()+1}月${d.getDate()}日`;
+  showToast(`✓ ${dateLabel}掛件：${item.name} 已記錄！`);
+
   redraw();
   renderRecentList();
   updateStats();
   renderCalendar();
+
+  // If saved date is in current calendar view, jump to it
+  if (d.getFullYear() === calYear && d.getMonth() === calMonth) {
+    renderCalendar();
+  }
 }
 
 // ===== HISTORY =====
@@ -822,7 +983,7 @@ function renderRecentList() {
     return;
   }
   container.innerHTML = recent.map(h => {
-    const d = new Date(h.date);
+    const d = new Date(h.date + 'T00:00:00');
     const label = `${d.getMonth()+1}/${d.getDate()}`;
     return `<div class="recent-item">
       <img src="${h.img}" alt="${h.name}">
@@ -878,7 +1039,7 @@ function openCalModal(dateString) {
   currentCalDate = dateString;
   document.getElementById('cal-modal-img').src = entry.img;
   document.getElementById('cal-modal-name').textContent = entry.name;
-  const d = new Date(dateString);
+  const d = new Date(dateString + 'T00:00:00');
   document.getElementById('cal-modal-date').textContent = `${d.getFullYear()} 年 ${d.getMonth()+1} 月 ${d.getDate()} 日`;
   document.getElementById('cal-modal-role').textContent = ROLE_CONFIG[entry.roleKey]?.name || '';
   document.getElementById('cal-detail-modal').classList.add('open');
@@ -895,11 +1056,9 @@ async function deleteCalEntry() {
   if (!currentCalDate) return;
   const dateToDelete = currentCalDate;
 
-  // Remove from local history
   history = history.filter(h => h.date !== dateToDelete);
   saveHistory();
 
-  // Remove from Supabase
   if (sbClient) {
     try {
       await sbClient.from('chiikawa_history').delete().eq('date', dateToDelete);
