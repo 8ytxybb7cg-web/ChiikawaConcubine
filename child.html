@@ -35,7 +35,7 @@
       max-width: 1200px; margin: 0 auto; padding: 10px;
     }
 
-    /* Grid */
+    /* Grid — no category sections, items rendered flat */
     .group-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
@@ -119,26 +119,27 @@
   <div id="card-container"></div>
 
 <script>
+// ===== CONFIG =====
 const SUPABASE_URL = 'https://myrhatzdypiwwgmmfbuw.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_bnnah-2fsCaQnKZDoKNJQw_NuYQVvKi';
-const SHEET_ID = "103_Hgjx-UZ-BA6oSmuyF5ro-wv8WqH-U";
-const SHEET_NAME = "ちいかわ";
+// ── NEW Google Sheet ──
+const SHEET_ID   = "19Eoo2ETGNSuVhAb5jWIB_6bUtPHLAod3zpiEeS-GbLg";
+const SHEET_NAME = "工作表1";
 
 let sbClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
-// sheetKey 現已改為 Google Sheet「角色」欄的精確全名，使用 === 比對
-const ROLE_CONFIGS = {
-  "chii":      { name:"吉伊",   sheetKey:"吉伊",   sbPrefix:"吉伊",   configKey:"visible_categories_chii",   color:"#d77485", loadImg:"https://i.postimg.cc/ncqjRJ9S/icon001.png" },
-  "hachi":     { name:"小八",   sheetKey:"小八",   sbPrefix:"小八",   configKey:"visible_categories_hachi",  color:"#6293b8", loadImg:"https://i.postimg.cc/Ss5kqJ3L/icon002.png" },
-  "usagi":     { name:"兔兔",   sheetKey:"兔兔",   sbPrefix:"兔兔",   configKey:"visible_categories",        color:"#f9be3c", loadImg:"https://i.postimg.cc/QdbBDJbp/icon003.png" },
-  "momo":      { name:"小桃",   sheetKey:"小桃",   sbPrefix:"小桃",   configKey:"visible_categories_others", color:"#838BC2", loadImg:"https://i.postimg.cc/rwcd7PSV/icon016.png" },
-  "furu":      { name:"古本",   sheetKey:"古本",   sbPrefix:"古本",   configKey:"visible_categories_others", color:"#eb9e97", loadImg:"https://i.postimg.cc/2jsL76yB/icon008.png" },
-  "master":    { name:"師傅",   sheetKey:"師傅",   sbPrefix:"師傅",   configKey:"visible_categories_others", color:"#CCAFA5", loadImg:"https://i.postimg.cc/y8vNtY1j/icon005.png" },
-  "kuri":      { name:"栗子",   sheetKey:"栗子",   sbPrefix:"栗子",   configKey:"visible_categories_kuri",   color:"#94C973", loadImg:"https://i.postimg.cc/mD0kjXLG/icon006.png" },
-  "shisa":     { name:"風獅",   sheetKey:"獅薩",   sbPrefix:"風獅",   configKey:"visible_categories_shisa",  color:"#FBAA60", loadImg:"https://i.postimg.cc/Ghn9s5gF/icon007.png" },
-  "jokebear":  { name:"大舅",   sheetKey:"大舅",   sbPrefix:"大舅",   configKey:"visible_categories_others", color:"#eca4b1", loadImg:"https://i.postimg.cc/gkDtxspX/icon.png" },
-  "korokke":   { name:"可樂餅", sheetKey:"可樂餅", sbPrefix:"可樂餅", configKey:"visible_categories_others", color:"#FBAA60", loadImg:"https://i.postimg.cc/HkkZXMWS/icon.png" },
-  "others":    { name:"其他",   sheetKey:"其他角色",sbPrefix:"其他",  configKey:"visible_categories_others", color:"#45818e", loadImg:"https://i.postimg.cc/PqVPpf0J/icon009.png" }
+const ROLE_CONFIG = {
+  "chii":     { name:"吉伊",   sheetKey:"吉伊",   sbPrefix:"吉伊",   color:"#d77485", icon:"https://i.postimg.cc/vZDs4YNZ/icon.png" },
+  "hachi":    { name:"小八",   sheetKey:"小八",   sbPrefix:"小八",   color:"#6293b8", icon:"https://i.postimg.cc/sDTzfQKL/icon.png" },
+  "usagi":    { name:"兔兔",   sheetKey:"兔兔",   sbPrefix:"兔兔",   color:"#f9be3c", icon:"https://i.postimg.cc/xdzVPsYr/icon.png" },
+  "momo":     { name:"小桃",   sheetKey:"小桃",   sbPrefix:"小桃",   color:"#838BC2", icon:"https://i.postimg.cc/9MP36rrJ/icon.png" },
+  "furu":     { name:"古本",   sheetKey:"古本",   sbPrefix:"古本",   color:"#eb9e97", icon:"https://i.postimg.cc/nh5t7yyY/icon.png" },
+  "master":   { name:"師傅",   sheetKey:"師傅",   sbPrefix:"師傅",   color:"#CCAFA5", icon:"https://i.postimg.cc/fTq4Q4Rn/icon.png" },
+  "kuri":     { name:"栗子",   sheetKey:"栗子",   sbPrefix:"栗子",   color:"#94C973", icon:"https://i.postimg.cc/FzGMK8bS/icon.png" },
+  "shisa":    { name:"風獅",   sheetKey:"風獅",   sbPrefix:"風獅",   color:"#FBAA60", icon:"https://i.postimg.cc/660Jz4sQ/icon.png" },
+  "jokebear": { name:"大舅",   sheetKey:"大舅",   sbPrefix:"大舅",   color:"#eca4b1", icon:"https://i.postimg.cc/d3qMwwCv/fen-yeicon-zhong-zheng.png" },
+  "korokke":  { name:"可樂餅", sheetKey:"可樂餅", sbPrefix:"可樂餅", color:"#FBAA60", icon:"https://i.postimg.cc/HkkZXMWS/icon.png" },
+  "others":   { name:"其他",   sheetKey:"其他",   sbPrefix:"其他",   color:"#45818e", icon:"https://i.postimg.cc/63xJbd58/icon.png" }
 };
 
 let currentRole = "chii";
@@ -163,7 +164,9 @@ function init() {
 
 window.addEventListener('message', function(e) {
   if (!e.data) return;
+
   if (e.data.type === 'scrollTo') {
+    // No category sections now; no-op or scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   if (e.data.type === 'ownedSet') {
@@ -184,20 +187,16 @@ async function loadData() {
       items?.forEach(row => { supabaseOverrides[row.item_name] = row; });
     }
 
-    // gviz/tq 加入 tq=select * 參數，強制回傳全部行，繞過 Sheet 的篩選器（filter view）
-    // 不加此參數時，若 Sheet 有啟用篩選器，被篩走的行不會被回傳
     const sheetRes = await fetch(
-      `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}&tq=${encodeURIComponent('select *')}&headers=1`
+      `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`
     ).then(r => r.text());
     const json = JSON.parse(sheetRes.substr(47).slice(0,-2));
     const rows = json.table.rows || [];
 
-    // 欄位索引與 Excel 一致：
-    // col[0]=角色 col[1]=種類 col[2]=款式 col[3]=名稱 ... col[12]=圖片
     globalItems = rows.map(row => {
-      const roleField = (row.c[0]?.v || "").trim();
-      const itemName = String(row.c[3]?.v || "").trim();
-      if (!itemName || roleField !== currentConfig.sheetKey) return null;
+      const roleField = row.c[0]?.v || "";
+      const itemName = row.c[1]?.v || "";
+      if (!itemName || !roleField.includes(currentConfig.sheetKey)) return null;
 
       const fullKey = currentConfig.sbPrefix + itemName;
       const shortKey = itemName;
@@ -209,7 +208,7 @@ async function loadData() {
       return {
         dbKey: finalKey,
         name: itemName,
-        img: row.c[12]?.v || "https://i.postimg.cc/bv5xRs04/image.png",
+        img: row.c[2]?.v || "https://i.postimg.cc/bv5xRs04/image.png",
         status: sbData?.status || "現貨",
       };
     }).filter(i => i !== null);
@@ -217,7 +216,10 @@ async function loadData() {
     document.getElementById("loading-msg").style.display = 'none';
     renderCards();
 
+    // Send a single dummy category so parent sub-nav stays hidden gracefully
     window.parent.postMessage({ type: 'categories', data: [] }, '*');
+
+    // Report total to parent
     window.parent.postMessage({ type: 'totalCount', count: globalItems.length }, '*');
 
   } catch (e) {
