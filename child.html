@@ -184,16 +184,49 @@ async function loadData() {
       items?.forEach(row => { supabaseOverrides[row.item_name] = row; });
     }
 
-    const sheetRes = await fetch(
-      `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`
+    // 使用 CSV export 而非 gviz/tq，避免 Google Sheet 篩選器導致部分行被隱藏
+    // gviz API 只回傳「可見行」，若 Sheet 有篩選器啟用會漏掉資料
+    // CSV export 永遠回傳全部行，不受篩選器影響
+    const GID_MAP = {
+      "ちいかわ": "0"  // 如有其他 sheet 請在此補充 gid
+    };
+    const gid = GID_MAP[SHEET_NAME] || "0";
+    const csvRes = await fetch(
+      `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`
     ).then(r => r.text());
-    const json = JSON.parse(sheetRes.substr(47).slice(0,-2));
-    const rows = json.table.rows || [];
 
-    globalItems = rows.map(row => {
-      // 使用精確全名比對（===），確保不同角色之間不會互相混入
-      const roleField = (row.c[0]?.v || "").trim();
-      const itemName = row.c[3]?.v || "";
+    // 解析 CSV（簡易解析器，支援帶逗號的引號欄位）
+    function parseCSV(text) {
+      const lines = text.split(/\r?\n/);
+      return lines.map(line => {
+        const cols = [];
+        let cur = '', inQ = false;
+        for (let i = 0; i < line.length; i++) {
+          const ch = line[i];
+          if (ch === '"') {
+            if (inQ && line[i+1] === '"') { cur += '"'; i++; }
+            else inQ = !inQ;
+          } else if (ch === ',' && !inQ) {
+            cols.push(cur); cur = '';
+          } else {
+            cur += ch;
+          }
+        }
+        cols.push(cur);
+        return cols;
+      });
+    }
+
+    const csvRows = parseCSV(csvRes);
+    // 第一行為標題列，跳過
+    const dataRows = csvRows.slice(1);
+
+    // 欄位索引與 Excel 一致：
+    // [0]=角色 [1]=種類 [2]=款式 [3]=名稱 [4]=原價 [5]=售價 [6]=庫存
+    // [7]=店面 [8]=非現 [9]=上架 [10]=受注 [11]=貨號 [12]=圖片
+    globalItems = dataRows.map(cols => {
+      const roleField = (cols[0] || "").trim();
+      const itemName = (cols[3] || "").trim();
       if (!itemName || roleField !== currentConfig.sheetKey) return null;
 
       const fullKey = currentConfig.sbPrefix + itemName;
@@ -203,10 +236,12 @@ async function loadData() {
       if (supabaseOverrides[fullKey]) { finalKey = fullKey; sbData = supabaseOverrides[fullKey]; }
       else if (supabaseOverrides[shortKey]) { finalKey = shortKey; sbData = supabaseOverrides[shortKey]; }
 
+      const img = (cols[12] || "").trim() || "https://i.postimg.cc/bv5xRs04/image.png";
+
       return {
         dbKey: finalKey,
         name: itemName,
-        img: row.c[12]?.v || "https://i.postimg.cc/bv5xRs04/image.png",
+        img: img,
         status: sbData?.status || "現貨",
       };
     }).filter(i => i !== null);
