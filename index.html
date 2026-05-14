@@ -447,19 +447,16 @@
 </head>
 <body>
 
-  <!-- TOP HEADER -->
   <div class="top-header">
     <div class="header-left">
       <img class="header-icon" src="https://i.postimg.cc/ncqjRJ9S/icon001.png" id="header-role-icon" alt="">
       <div class="header-title">ちいかわ 掛件手帳</div>
     </div>
     <div class="header-right" id="header-right">
-      <!-- dynamic -->
-    </div>
+      </div>
   </div>
 
   <div class="main-scroll">
-    <!-- ===== PAGE: HOME ===== -->
     <div class="page active" id="page-home">
       
       <div class="home-hero">
@@ -468,7 +465,6 @@
         <div class="home-subtitle">從你的收藏中隨機抽選今日掛件</div>
       </div>
 
-      <!-- Stats -->
       <div style="height:16px;"></div>
       <div class="stats-bar" id="stats-bar">
         <div class="stat-item"><div class="stat-num" id="stat-owned">0</div><div class="stat-label">已擁有</div></div>
@@ -476,17 +472,14 @@
         <div class="stat-item"><div class="stat-num" id="stat-streak">0</div><div class="stat-label">連續天數</div></div>
       </div>
 
-      <!-- Role Filter -->
       <div class="role-filter-section">
         <div class="section-label">✦ 角色篩選（多選）</div>
         <div class="role-chips" id="role-chips"></div>
       </div>
 
-      <!-- Draw Section -->
       <div class="draw-section">
         <div class="draw-section-title">✦ 掛件抽選 ✦</div>
 
-        <!-- Date picker row -->
         <div class="draw-date-row">
           <span class="draw-date-label">📅 抽籤日期：</span>
           <input type="date" id="draw-date-input" class="draw-date-input">
@@ -506,7 +499,6 @@
         <button class="btn-draw" id="btn-draw" onclick="startDraw()">今日掛邊隻？🎲</button>
       </div>
 
-      <!-- Recent History -->
       <div class="section-card">
         <div class="section-card-title"><span class="deco-dot"></span>最近掛件紀錄</div>
         <div class="recent-list" id="recent-list">
@@ -516,7 +508,6 @@
 
     </div>
 
-    <!-- ===== PAGE: COLLECTION ===== -->
     <div class="page" id="page-collection">
       <div class="collection-header">
         <div class="search-bar">
@@ -547,7 +538,6 @@
       </div>
     </div>
 
-    <!-- ===== PAGE: CALENDAR ===== -->
     <div class="page" id="page-calendar">
       <div class="calendar-wrap">
         <div class="cal-header">
@@ -559,10 +549,7 @@
       </div>
     </div>
 
-  </div><!-- end main-scroll -->
-
-  <!-- BOTTOM NAV -->
-  <div class="bottom-nav">
+  </div><div class="bottom-nav">
     <div class="nav-tab active" id="nav-home" onclick="showPage('home')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       <span>首頁</span>
@@ -577,7 +564,6 @@
     </div>
   </div>
 
-  <!-- DRAW ANIMATION OVERLAY -->
   <div class="draw-overlay" id="draw-overlay">
     <div class="draw-anim-stage">
       <div class="draw-spin-ring"></div>
@@ -587,7 +573,6 @@
     <div class="draw-anim-text" id="draw-anim-text">🌸 抽選中… 🌸</div>
   </div>
 
-  <!-- CALENDAR DETAIL MODAL -->
   <div class="modal-overlay" id="cal-modal-overlay" onclick="closeCalModal()"></div>
   <div class="cal-detail-modal" id="cal-detail-modal">
     <div class="cal-modal-drag"></div>
@@ -602,7 +587,6 @@
     <button class="btn-delete-entry" onclick="deleteCalEntry()">🗑 刪除此紀錄</button>
   </div>
 
-  <!-- DUPLICATE DATE WARNING MODAL -->
   <div class="warn-modal-overlay" id="warn-modal-overlay" onclick="closeWarnModal()"></div>
   <div class="warn-modal" id="warn-modal">
     <div class="warn-modal-icon">⚠️</div>
@@ -614,7 +598,6 @@
     </div>
   </div>
 
-  <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
 <script>
@@ -647,7 +630,11 @@ let currentPage = "home";
 let allItems = [];
 let ownedItems = new Set();
 let history = [];
-let selectedRoles = new Set(Object.keys(ROLE_CONFIG));
+
+// 【修改 1】：從 LocalStorage 載入用戶的篩選紀錄，若無紀錄則預設全選
+let savedRoles = localStorage.getItem('chiikawa_selected_roles');
+let selectedRoles = savedRoles ? new Set(JSON.parse(savedRoles)) : new Set(Object.keys(ROLE_CONFIG));
+
 let currentDrawResult = null;
 let calYear = new Date().getFullYear();
 let calMonth = new Date().getMonth();
@@ -734,9 +721,10 @@ async function loadAllItems() {
 
     allItems = [];
     rows.forEach(row => {
-      const roleField = (row.c[0]?.v || "").trim(); // 角色 — exact match
-      const name      = (row.c[1]?.v || "").trim(); // 名稱
-      const img       = (row.c[2]?.v || "https://i.postimg.cc/bv5xRs04/image.png").trim(); // 圖片
+      // 【修改 2】：增加 .toString().trim() 避免 Google Sheet 空白字元或數字型態導致的錯誤
+      const roleField = (row.c[0]?.v || "").toString().trim(); // 角色 — exact match
+      const name      = (row.c[1]?.v || "").toString().trim(); // 名稱
+      const img       = (row.c[2]?.v || "https://i.postimg.cc/bv5xRs04/image.png").toString().trim(); // 圖片
       if (!name || !roleField) return;
 
       // Exact match against sheetKey
@@ -744,7 +732,8 @@ async function loadAllItems() {
       if (!entry) return;
 
       const [key, cfg] = entry;
-      const dbKey = cfg.sbPrefix + name;
+      // 這裡產生的 dbKey 會是 "角色前綴+名稱"（例如: 小桃餐廳），能確保不同角色的同名物品不互相覆蓋
+      const dbKey = cfg.sbPrefix + name; 
       allItems.push({ name, roleKey: key, roleName: cfg.name, img, dbKey });
     });
 
@@ -778,8 +767,9 @@ function updateStats() {
 // ===== ROLE CHIPS =====
 function renderRoleChips() {
   const container = document.getElementById('role-chips');
+  // 【修改 3】：依據 selectedRoles 判斷初始化時是否加上 active 樣式
   container.innerHTML = Object.entries(ROLE_CONFIG).map(([key, cfg]) => `
-    <div class="role-chip active" id="chip-${key}" onclick="toggleRoleChip('${key}')" style="--tab-color:${cfg.color}">
+    <div class="role-chip ${selectedRoles.has(key) ? 'active' : ''}" id="chip-${key}" onclick="toggleRoleChip('${key}')" style="--tab-color:${cfg.color}">
       <img src="${cfg.icon}" alt="${cfg.name}">
     </div>
   `).join('');
@@ -795,6 +785,8 @@ function toggleRoleChip(key) {
     selectedRoles.add(key);
     chip.classList.add('active');
   }
+  // 【修改 4】：將用戶的篩選變動儲存回 LocalStorage
+  localStorage.setItem('chiikawa_selected_roles', JSON.stringify(Array.from(selectedRoles)));
 }
 
 // ===== DRAW SYSTEM =====
