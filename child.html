@@ -6,106 +6,114 @@
   <title>Chiikawa Collection Child</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    :root { --tab-color: #d77485; --accent-soft: #fdf0f2; --warm: #f9f0e8; --border: #ede0d8; }
+    :root { 
+      --tab-color: #d77485; 
+      --accent-soft: #fdf0f2; 
+      --warm: #f9f0e8; 
+      --border: #ede0d8; 
+    }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC", sans-serif;
       background: transparent;
-      margin: 0; padding: 0 0 60px;
+      margin: 0; padding: 0 0 40px;
       color: #3d2f2f;
       overflow-x: hidden;
+      /* 確保平滑滾動 */
+      scroll-behavior: smooth;
     }
 
-    /* Loading */
+    /* Loading 狀態優化 */
     .loading-container {
-      margin-top: 60px; text-align: center;
-      display: flex; flex-direction: column; align-items: center; gap: 10px;
-      color: #a07070; font-size: 13px;
+      margin-top: 80px; text-align: center;
+      display: flex; flex-direction: column; align-items: center; gap: 15px;
+      color: #a07070; font-size: 14px;
     }
     .loading-icon {
-      width: 50px; height: 50px; object-fit: contain;
-      animation: bounce 0.7s ease-in-out infinite alternate;
+      width: 60px; height: 60px; object-fit: contain;
+      animation: bounce 0.8s ease-in-out infinite alternate;
     }
-    @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-8px); } }
+    @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-12px); } }
 
-    /* Card Container */
+    /* 卡片容器 */
     #card-container {
-      max-width: 1200px; margin: 0 auto; padding: 10px;
+      max-width: 1200px; margin: 0 auto; padding: 12px;
     }
 
-    /* Grid */
+    /* 響應式網格 */
     .group-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-      gap: 10px; justify-items: center;
+      grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+      gap: 12px; justify-items: center;
     }
 
-    /* Card */
+    /* 卡片樣式 */
     .card {
-      width: 100%; max-width: 120px;
-      border-radius: 16px;
+      width: 100%; max-width: 130px;
+      border-radius: 18px;
       background: #fff;
       border: 2px solid var(--border);
-      position: relative; text-align: center; padding-bottom: 8px;
-      box-shadow: 0 2px 8px rgba(180,100,110,0.07);
+      position: relative; text-align: center; padding-bottom: 10px;
+      box-shadow: 0 2px 8px rgba(180,100,110,0.06);
       cursor: pointer; overflow: hidden;
-      transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s, border-color 0.2s;
     }
-    .card:active { transform: scale(0.96); }
+    .card:active { transform: scale(0.95); }
+    
     .card.owned {
       border-color: var(--tab-color);
-      background: var(--accent-soft, #fdf0f2);
-      box-shadow: 0 4px 14px rgba(215,116,133,0.18);
+      background: var(--accent-soft);
+      box-shadow: 0 4px 12px rgba(215,116,133,0.15);
     }
+
     .card img {
       width: 100%; aspect-ratio: 1; object-fit: contain;
-      padding: 8px; box-sizing: border-box;
-      transition: opacity 0.2s;
+      padding: 10px; box-sizing: border-box;
+      transition: opacity 0.3s, filter 0.3s;
     }
-    .card.not-owned img { opacity: 0.45; filter: grayscale(30%); }
+    /* 未擁有狀態：半透明且略微灰色 */
+    .card.not-owned img { opacity: 0.5; filter: grayscale(40%); }
 
     .card .name {
-      margin: 2px 6px 4px;
-      font-size: 11px; font-weight: 600; line-height: 1.4;
-      min-height: 28px; display: flex; align-items: center; justify-content: center;
+      margin: 4px 8px;
+      font-size: 11px; font-weight: 600; line-height: 1.3;
+      min-height: 30px; display: flex; align-items: center; justify-content: center;
       color: #3d2f2f;
     }
 
-    /* Owned toggle button */
+    /* 收藏按鈕 (心形) */
     .owned-btn {
-      position: absolute; top: 6px; right: 6px;
-      width: 26px; height: 26px; border-radius: 50%;
+      position: absolute; top: 8px; right: 8px;
+      width: 28px; height: 28px; border-radius: 50%;
       border: 2px solid var(--tab-color);
       background: #fff; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      font-size: 13px; transition: background 0.2s, transform 0.15s;
-      z-index: 10; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      font-size: 14px; transition: all 0.2s ease;
+      z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      color: var(--tab-color);
     }
-    .owned-btn:active { transform: scale(0.88); }
-    .card.owned .owned-btn { background: var(--tab-color); }
+    .card.owned .owned-btn {
+      background: var(--tab-color);
+      color: #fff;
+    }
+    .owned-btn:active { transform: scale(0.85); }
 
-    /* Not owned label */
-    .not-owned-label {
-      font-size: 10px; color: #bbb; font-weight: 500;
-      margin-bottom: 2px; display: block;
-    }
+    /* 標籤顯示控制 */
+    .not-owned-label { font-size: 10px; color: #bbb; font-weight: 500; display: block; }
     .card.owned .not-owned-label { display: none; }
-    .owned-label {
-      font-size: 10px; color: var(--tab-color); font-weight: 700;
-      margin-bottom: 2px; display: none;
-    }
+    
+    .owned-label { font-size: 10px; color: var(--tab-color); font-weight: 700; display: none; }
     .card.owned .owned-label { display: block; }
 
-    /* Search highlight */
+    /* 搜尋過濾 */
     .card.search-hide { display: none; }
-    .card.search-match { border-color: var(--tab-color); }
+    .card.search-match { transform: scale(1.02); border-width: 3px; }
 
-    /* Empty state */
     .empty-note {
-      text-align: center; padding: 40px 20px;
-      color: #b09090; font-size: 13px;
+      text-align: center; padding: 60px 20px;
+      color: #b09090; font-size: 14px; font-style: italic;
     }
   </style>
 </head>
@@ -113,42 +121,40 @@
 
   <div id="loading-msg" class="loading-container">
     <img id="loading-img" src="" alt="Loading" class="loading-icon" />
-    <div>讀取中…</div>
+    <div>卡片同步中...</div>
   </div>
 
   <div id="card-container"></div>
 
 <script>
+// --- 配置參數 ---
 const SUPABASE_URL = 'https://myrhatzdypiwwgmmfbuw.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_bnnah-2fsCaQnKZDoKNJQw_NuYQVvKi';
-
-// ── NEW Google Sheet ──
 const SHEET_ID   = "19Eoo2ETGNSuVhAb5jWIB_6bUtPHLAod3zpiEeS-GbLg";
 const SHEET_NAME = "工作表1";
 
-let sbClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
-
-// sheetKey is now the exact string in the 角色 column of the new sheet
 const ROLE_CONFIGS = {
-  "chii":      { name:"吉伊",   sheetKey:"吉伊",   sbPrefix:"吉伊",   configKey:"visible_categories_chii",   color:"#d77485", loadImg:"https://i.postimg.cc/ncqjRJ9S/icon001.png" },
-  "hachi":     { name:"小八",   sheetKey:"小八",   sbPrefix:"小八",   configKey:"visible_categories_hachi",  color:"#6293b8", loadImg:"https://i.postimg.cc/Ss5kqJ3L/icon002.png" },
-  "usagi":     { name:"兔兔",   sheetKey:"兔兔",   sbPrefix:"兔兔",   configKey:"visible_categories",        color:"#f9be3c", loadImg:"https://i.postimg.cc/QdbBDJbp/icon003.png" },
-  "momo":      { name:"小桃",   sheetKey:"小桃",   sbPrefix:"小桃",   configKey:"visible_categories_others", color:"#838BC2", loadImg:"https://i.postimg.cc/rwcd7PSV/icon016.png" },
-  "furu":      { name:"古本",   sheetKey:"古本",   sbPrefix:"古本",   configKey:"visible_categories_others", color:"#eb9e97", loadImg:"https://i.postimg.cc/2jsL76yB/icon008.png" },
-  "master":    { name:"師傅",   sheetKey:"師傅",   sbPrefix:"師傅",   configKey:"visible_categories_others", color:"#CCAFA5", loadImg:"https://i.postimg.cc/y8vNtY1j/icon005.png" },
-  "kuri":      { name:"栗子",   sheetKey:"栗子",   sbPrefix:"栗子",   configKey:"visible_categories_kuri",   color:"#94C973", loadImg:"https://i.postimg.cc/mD0kjXLG/icon006.png" },
-  "shisa":     { name:"風獅",   sheetKey:"風獅",   sbPrefix:"風獅",   configKey:"visible_categories_shisa",  color:"#FBAA60", loadImg:"https://i.postimg.cc/Ghn9s5gF/icon007.png" },
-  "jokebear":  { name:"大舅",   sheetKey:"大舅",   sbPrefix:"大舅",   configKey:"visible_categories_others", color:"#eca4b1", loadImg:"https://i.postimg.cc/gkDtxspX/icon.png" },
-  "korokke":   { name:"可樂餅", sheetKey:"可樂餅", sbPrefix:"可樂餅", configKey:"visible_categories_others", color:"#FBAA60", loadImg:"https://i.postimg.cc/HkkZXMWS/icon.png" },
-  "others":    { name:"其他",   sheetKey:"其他",   sbPrefix:"其他",   configKey:"visible_categories_others", color:"#45818e", loadImg:"https://i.postimg.cc/PqVPpf0J/icon009.png" }
+  "chii":      { name:"吉伊",   sheetKey:"吉伊",   sbPrefix:"吉伊",   color:"#d77485", loadImg:"https://i.postimg.cc/ncqjRJ9S/icon001.png" },
+  "hachi":     { name:"小八",   sheetKey:"小八",   sbPrefix:"小八",   color:"#6293b8", loadImg:"https://i.postimg.cc/Ss5kqJ3L/icon002.png" },
+  "usagi":     { name:"兔兔",   sheetKey:"兔兔",   sbPrefix:"兔兔",   color:"#f9be3c", loadImg:"https://i.postimg.cc/QdbBDJbp/icon003.png" },
+  "momo":      { name:"小桃",   sheetKey:"小桃",   sbPrefix:"小桃",   color:"#838BC2", loadImg:"https://i.postimg.cc/rwcd7PSV/icon016.png" },
+  "furu":      { name:"古本",   sheetKey:"古本",   sbPrefix:"古本",   color:"#eb9e97", loadImg:"https://i.postimg.cc/2jsL76yB/icon008.png" },
+  "master":    { name:"師傅",   sheetKey:"師傅",   sbPrefix:"師傅",   color:"#CCAFA5", loadImg:"https://i.postimg.cc/y8vNtY1j/icon005.png" },
+  "kuri":      { name:"栗子",   sheetKey:"栗子",   sbPrefix:"栗子",   color:"#94C973", loadImg:"https://i.postimg.cc/mD0kjXLG/icon006.png" },
+  "shisa":     { name:"風獅",   sheetKey:"風獅",   sbPrefix:"風獅",   color:"#FBAA60", loadImg:"https://i.postimg.cc/Ghn9s5gF/icon007.png" },
+  "jokebear":  { name:"大舅",   sheetKey:"大舅",   sbPrefix:"大舅",   color:"#eca4b1", loadImg:"https://i.postimg.cc/gkDtxspX/icon.png" },
+  "korokke":   { name:"可樂餅", sheetKey:"可樂餅", sbPrefix:"可樂餅", color:"#FBAA60", loadImg:"https://i.postimg.cc/HkkZXMWS/icon.png" },
+  "others":    { name:"其他",   sheetKey:"其他",   sbPrefix:"其他",   color:"#45818e", loadImg:"https://i.postimg.cc/PqVPpf0J/icon009.png" }
 };
 
+let sbClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 let currentRole = "chii";
 let currentConfig = ROLE_CONFIGS["chii"];
 let globalItems = [];
 let ownedItems = new Set();
 let supabaseOverrides = {};
 
+// --- 初始化 ---
 function init() {
   const urlParams = new URLSearchParams(window.location.search);
   const roleParam = urlParams.get('role');
@@ -156,98 +162,99 @@ function init() {
     currentRole = roleParam;
     currentConfig = ROLE_CONFIGS[roleParam];
   }
+
+  // 設定角色主題色
   document.documentElement.style.setProperty('--tab-color', currentConfig.color);
-  document.documentElement.style.setProperty('--accent-soft', currentConfig.color + '22');
+  document.documentElement.style.setProperty('--accent-soft', currentConfig.color + '15');
   document.getElementById("loading-img").src = currentConfig.loadImg;
+
   loadData();
+  
+  // 通知父視窗已就緒
   window.parent.postMessage({ type: 'childReady' }, '*');
 }
 
+// --- 事件監聽 (接收父視窗指令) ---
 window.addEventListener('message', function(e) {
   if (!e.data) return;
-
-  if (e.data.type === 'scrollTo') {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-  if (e.data.type === 'ownedSet') {
-    ownedItems = new Set(e.data.owned || []);
-    renderCards();
-  }
-  if (e.data.type === 'search') {
-    doSearch(e.data.query || '');
+  
+  switch(e.data.type) {
+    case 'scrollTo':
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      break;
+    case 'ownedSet':
+      ownedItems = new Set(e.data.owned || []);
+      renderCards();
+      break;
+    case 'search':
+      doSearch(e.data.query || '');
+      break;
   }
 });
 
+// --- 資料加載 ---
 async function loadData() {
   try {
     supabaseOverrides = {};
-
-    // Load Supabase item overrides (status flags etc.)
+    
+    // 1. 取得 Supabase 覆蓋設定 (如顯示狀態)
     if (sbClient) {
-      const { data: items } = await sbClient.from('chiikawa_data').select('*');
-      items?.forEach(row => { supabaseOverrides[row.item_name] = row; });
+      const { data } = await sbClient.from('chiikawa_data').select('*');
+      data?.forEach(row => { supabaseOverrides[row.item_name] = row; });
     }
 
-    // Fetch new sheet — 3 columns: 角色 | 名稱 | 圖片
-    const sheetRes = await fetch(
-      `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`
-    ).then(r => r.text());
-    const json = JSON.parse(sheetRes.substr(47).slice(0,-2));
+    // 2. 取得 Google Sheet 原始資料
+    const sheetUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
+    const res = await fetch(sheetUrl).then(r => r.text());
+    const json = JSON.parse(res.substr(47).slice(0,-2));
     const rows = json.table.rows || [];
 
+    // 3. 資料轉換與過濾
     globalItems = rows.map(row => {
-      const roleField = (row.c[0]?.v || "").trim(); // 角色 — exact match
-      const itemName  = (row.c[1]?.v || "").trim(); // 名稱
-      const imgUrl    = (row.c[2]?.v || "https://i.postimg.cc/bv5xRs04/image.png").trim(); // 圖片
+      const roleField = (row.c[0]?.v || "").trim();
+      const itemName  = (row.c[1]?.v || "").trim();
+      const imgUrl    = (row.c[2]?.v || "https://i.postimg.cc/bv5xRs04/image.png").trim();
 
       if (!itemName || roleField !== currentConfig.sheetKey) return null;
 
-      // Look up Supabase overrides by full key or short key
-      const fullKey  = currentConfig.sbPrefix + itemName;
-      const shortKey = itemName;
-      let sbData = null, finalKey = fullKey;
-
-      if (supabaseOverrides[fullKey]) {
-        finalKey = fullKey;
-        sbData   = supabaseOverrides[fullKey];
-      } else if (supabaseOverrides[shortKey]) {
-        finalKey = shortKey;
-        sbData   = supabaseOverrides[shortKey];
-      }
+      // 比對 Supabase key (Prefix + Name)
+      const fullKey = currentConfig.sbPrefix + itemName;
+      const sbData = supabaseOverrides[fullKey] || supabaseOverrides[itemName];
+      const dbKey = sbData ? (supabaseOverrides[fullKey] ? fullKey : itemName) : fullKey;
 
       return {
-        dbKey:  finalKey,
+        dbKey:  dbKey,
         name:   itemName,
         img:    imgUrl,
-        status: sbData?.status || "現貨",
+        status: sbData?.status || "現貨"
       };
     }).filter(i => i !== null);
 
     document.getElementById("loading-msg").style.display = 'none';
     renderCards();
 
-    // No category sections in new sheet — send empty array so parent sub-nav stays hidden
+    // 通知父視窗統計數據
     window.parent.postMessage({ type: 'categories', data: [] }, '*');
-
-    // Report total count to parent
     window.parent.postMessage({ type: 'totalCount', count: globalItems.length }, '*');
 
-  } catch (e) {
-    console.error(e);
-    const loadingDiv = document.querySelector("#loading-msg div");
-    if (loadingDiv) loadingDiv.innerText = "載入失敗，請稍後重試";
+  } catch (err) {
+    console.error("Data Load Error:", err);
+    const msg = document.querySelector("#loading-msg div");
+    if (msg) msg.innerText = "連線失敗，請檢查網路。";
   }
 }
 
+// --- 渲染卡片 ---
 function renderCards() {
   const container = document.getElementById("card-container");
   container.innerHTML = "";
 
+  // 過濾標記為 "不顯示" 的卡片
   const items = globalItems.filter(i => !i.status.includes("不顯示"));
 
   if (items.length === 0) {
-    container.innerHTML = '<div class="empty-note">沒有項目</div>';
-    setTimeout(sendHeight, 100);
+    container.innerHTML = '<div class="empty-note">此分類暫無卡片資料</div>';
+    sendHeight();
     return;
   }
 
@@ -258,30 +265,40 @@ function renderCards() {
     const isOwned = ownedItems.has(item.dbKey);
     const card = document.createElement("div");
     card.className = `card ${isOwned ? 'owned' : 'not-owned'}`;
-    card.dataset.key  = item.dbKey;
+    card.dataset.key = item.dbKey;
     card.dataset.name = item.name;
+    
     card.innerHTML = `
-      <button class="owned-btn" onclick="event.stopPropagation(); toggleOwned('${item.dbKey}', '${escHtml(item.img)}', '${escHtml(item.name)}')">
+      <button class="owned-btn" onclick="handleToggle(event, '${item.dbKey}', '${esc(item.img)}', '${esc(item.name)}')">
         ${isOwned ? '♥' : '♡'}
       </button>
-      <img src="${item.img}" loading="lazy" alt="${escHtml(item.name)}">
+      <img src="${item.img}" loading="lazy" alt="${esc(item.name)}">
       <div class="name">${item.name}</div>
       <span class="owned-label">✓ 已擁有</span>
       <span class="not-owned-label">未擁有</span>
     `;
+    
+    // 點擊整張卡片也能觸發 (優化行動端體驗)
+    card.onclick = () => toggleOwned(item.dbKey, item.img, item.name);
     grid.appendChild(card);
   });
 
   container.appendChild(grid);
-  setTimeout(sendHeight, 100);
+  setTimeout(sendHeight, 150);
+}
+
+// --- 功能函數 ---
+function handleToggle(e, dbKey, img, name) {
+  e.stopPropagation(); // 防止觸發卡片本身的點擊事件
+  toggleOwned(dbKey, img, name);
 }
 
 function toggleOwned(dbKey, img, name) {
   window.parent.postMessage({
-    type:    'toggleOwned',
-    dbKey:   dbKey,
-    img:     img,
-    name:    name,
+    type: 'toggleOwned',
+    dbKey: dbKey,
+    img: img,
+    name: name,
     roleKey: currentRole
   }, '*');
 }
@@ -289,24 +306,19 @@ function toggleOwned(dbKey, img, name) {
 function doSearch(query) {
   const q = query.trim().toLowerCase();
   document.querySelectorAll('.card').forEach(card => {
-    if (!q) {
-      card.classList.remove('search-hide', 'search-match');
-    } else if (card.dataset.name.toLowerCase().includes(q)) {
-      card.classList.remove('search-hide');
-      card.classList.add('search-match');
-    } else {
-      card.classList.add('search-hide');
-      card.classList.remove('search-match');
-    }
+    const isMatch = !q || card.dataset.name.toLowerCase().includes(q);
+    card.classList.toggle('search-hide', !isMatch);
+    card.classList.toggle('search-match', !!q && isMatch);
   });
+  sendHeight();
 }
 
-function escHtml(s) {
+function esc(s) {
   return String(s).replace(/'/g,"&#39;").replace(/"/g,"&quot;");
 }
 
 function sendHeight() {
-  window.parent.postMessage({ height: document.body.scrollHeight + 20 }, '*');
+  window.parent.postMessage({ height: document.body.scrollHeight + 10 }, '*');
 }
 
 window.addEventListener('resize', sendHeight);
