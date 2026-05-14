@@ -202,21 +202,22 @@ async function loadData() {
 
       if (!itemName || roleField !== currentConfig.sheetKey) return null;
 
-      // Look up Supabase overrides by full key or short key
-      const fullKey  = currentConfig.sbPrefix + itemName;
-      const shortKey = itemName;
-      let sbData = null, finalKey = fullKey;
+      // ── Bug Fix #1 ──
+      // Always construct dbKey as sbPrefix + itemName (role-scoped).
+      // NEVER fall back to bare itemName as dbKey, because different roles share
+      // the same item names (e.g. 餐廳 exists for 吉伊, 兔兔, 小桃, etc.).
+      // Using bare itemName would cause Supabase overrides from another role's
+      // identically-named item to be applied here, and worse, would produce
+      // duplicate dbKeys across roles, hiding cards from their correct role page.
+      const fullKey = currentConfig.sbPrefix + itemName;
 
-      if (supabaseOverrides[fullKey]) {
-        finalKey = fullKey;
-        sbData   = supabaseOverrides[fullKey];
-      } else if (supabaseOverrides[shortKey]) {
-        finalKey = shortKey;
-        sbData   = supabaseOverrides[shortKey];
-      }
+      // Look up Supabase status override by full role-scoped key only.
+      // If not found, also try bare itemName as a legacy fallback for status only
+      // (but NEVER use bare itemName as the card's dbKey).
+      const sbData = supabaseOverrides[fullKey] || supabaseOverrides[itemName] || null;
 
       return {
-        dbKey:  finalKey,
+        dbKey:  fullKey,          // always role-scoped — guarantees uniqueness
         name:   itemName,
         img:    imgUrl,
         status: sbData?.status || "現貨",
