@@ -486,8 +486,8 @@
       <div class="draw-section">
         <div class="draw-section-title">✦ 掛件抽選 ✦</div>
 
-        <!-- Date picker row -->
-        <div class="draw-date-row">
+        <!-- Date picker row — placed directly under the title -->
+        <div class="draw-date-row" style="margin-top:10px;">
           <span class="draw-date-label">📅 抽籤日期：</span>
           <input type="date" id="draw-date-input" class="draw-date-input">
           <span class="draw-date-reset" onclick="resetDrawDate()">今日</span>
@@ -500,7 +500,7 @@
           </div>
         </div>
         <div id="draw-confirm-btns" class="draw-confirm-btns" style="display:none;">
-          <button class="btn-confirm no" onclick="redraw()">再抽一次</button>
+          <button class="btn-confirm no" onclick="redrawAndStart()">再抽一次</button>
           <button class="btn-confirm yes" onclick="confirmDraw()">✓ 就決定是你了！</button>
         </div>
         <button class="btn-draw" id="btn-draw" onclick="startDraw()">今日掛邊隻？🎲</button>
@@ -647,7 +647,7 @@ let currentPage = "home";
 let allItems = [];
 let ownedItems = new Set();
 let history = [];
-let selectedRoles = new Set(Object.keys(ROLE_CONFIG));
+let selectedRoles = new Set(Object.keys(ROLE_CONFIG)); // will be overridden from localStorage
 let currentDrawResult = null;
 let calYear = new Date().getFullYear();
 let calMonth = new Date().getMonth();
@@ -663,6 +663,7 @@ const subNavContent = document.getElementById("sub-nav-content");
 // ===== INIT =====
 async function init() {
   renderHomeDate();
+  loadSelectedRoles(); // Fix Bug 4: restore user's role filter before rendering chips
   renderRoleChips();
   initDrawDatePicker();
   // Load history from Supabase first (Fix #3), merge with localStorage
@@ -779,10 +780,31 @@ function updateStats() {
 function renderRoleChips() {
   const container = document.getElementById('role-chips');
   container.innerHTML = Object.entries(ROLE_CONFIG).map(([key, cfg]) => `
-    <div class="role-chip active" id="chip-${key}" onclick="toggleRoleChip('${key}')" style="--tab-color:${cfg.color}">
+    <div class="role-chip ${selectedRoles.has(key) ? 'active' : ''}" id="chip-${key}" onclick="toggleRoleChip('${key}')" style="--tab-color:${cfg.color}">
       <img src="${cfg.icon}" alt="${cfg.name}">
     </div>
   `).join('');
+}
+
+function loadSelectedRoles() {
+  const saved = localStorage.getItem('chiikawa_selected_roles');
+  if (saved) {
+    try {
+      const arr = JSON.parse(saved);
+      // Only keep keys that exist in ROLE_CONFIG
+      const valid = arr.filter(k => ROLE_CONFIG[k]);
+      if (valid.length > 0) {
+        selectedRoles = new Set(valid);
+        return;
+      }
+    } catch(e) {}
+  }
+  // Default: all selected
+  selectedRoles = new Set(Object.keys(ROLE_CONFIG));
+}
+
+function saveSelectedRoles() {
+  localStorage.setItem('chiikawa_selected_roles', JSON.stringify(Array.from(selectedRoles)));
 }
 
 function toggleRoleChip(key) {
@@ -795,6 +817,7 @@ function toggleRoleChip(key) {
     selectedRoles.add(key);
     chip.classList.add('active');
   }
+  saveSelectedRoles();
 }
 
 // ===== DRAW SYSTEM =====
@@ -899,6 +922,14 @@ function showDrawResult(item) {
   `;
   document.getElementById('draw-confirm-btns').style.display = 'flex';
   document.getElementById('btn-draw').style.display = 'none';
+}
+
+function redrawAndStart() {
+  // Reset result state silently, then immediately trigger a new draw
+  currentDrawResult = null;
+  document.getElementById('draw-confirm-btns').style.display = 'none';
+  document.getElementById('btn-draw').style.display = 'block';
+  startDraw();
 }
 
 function redraw() {
